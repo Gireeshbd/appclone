@@ -5,41 +5,112 @@
  * @module services/blockingService
  */
 
-import {NativeModules, Platform} from 'react-native';
+import {NativeModules, NativeEventEmitter, Platform, EmitterSubscription} from 'react-native';
 import {BlockedApp, InstalledApp} from '@types';
 
-// Native module interfaces
-interface AppBlockingModule {
-  // iOS Screen Time API / Android Accessibility Service
-  requestPermission(): Promise<boolean>;
-  hasPermission(): Promise<boolean>;
-  getInstalledApps(): Promise<InstalledApp[]>;
-  blockApps(bundleIds: string[]): Promise<boolean>;
-  unblockApps(bundleIds: string[], duration: number): Promise<boolean>;
-  isAppBlocked(bundleId: string): Promise<boolean>;
-  openAppSettings(): Promise<void>;
+// Native module interfaces for iOS
+interface IOSScreenTimeManager {
+  requestAuthorization(): Promise<{authorized: boolean}>;
+  checkAuthorizationStatus(): Promise<{status: string; authorized: boolean}>;
+  blockApps(bundleIds: string[]): Promise<{success: boolean; blockedCount: number}>;
+  unblockApps(bundleIds: string[]): Promise<{success: boolean; unblockedCount: number}>;
+  unblockAllApps(): Promise<{success: boolean}>;
+  openAppPicker(): Promise<void>;
+  getInstalledApps(): Promise<Array<{bundleId: string; name: string; icon: string}>>;
 }
 
-// Get native module
-const {AppBlockingModule: NativeAppBlocking} = NativeModules;
+// Native module interfaces for Android
+interface AndroidBlockingModule {
+  checkPermissionStatus(): Promise<{
+    hasPermission: boolean;
+    isServiceRunning: boolean;
+    status: string;
+  }>;
+  requestPermission(): Promise<{opened: boolean; message: string}>;
+  blockApps(bundleIds: string[]): Promise<{success: boolean; blockedCount: number}>;
+  unblockApps(bundleIds: string[], durationSeconds: number): Promise<{
+    success: boolean;
+    unblockedCount: number;
+    duration: number;
+  }>;
+  getBlockedApps(): Promise<string[]>;
+  lockAllApps(): Promise<{success: boolean}>;
+  getInstalledApps(): Promise<Array<{bundleId: string; name: string; icon: string}>>;
+}
+
+// Get native modules
+const ScreenTimeManager = Platform.OS === 'ios'
+  ? (NativeModules.ScreenTimeManager as IOSScreenTimeManager)
+  : null;
+
+const BlockingModule = Platform.OS === 'android'
+  ? (NativeModules.BlockingModule as AndroidBlockingModule)
+  : null;
 
 /**
  * App Blocking Service Class
  * Provides cross-platform interface to native app blocking functionality
  */
 class BlockingService {
+  private eventEmitter: NativeEventEmitter | null = null;
+  private appBlockedSubscription: EmitterSubscription | null = null;
+
+  constructor() {
+    if (Platform.OS === 'android' && BlockingModule) {
+      this.eventEmitter = new NativeEventEmitter(BlockingModule as any);
+      this.setupEventListeners();
+    }
+  }
+
+  /**
+   * Setup event listeners for native events
+   */
+  private setupEventListeners() {
+    if (this.eventEmitter) {
+      this.appBlockedSubscription = this.eventEmitter.addListener(
+        'onAppBlocked',
+        (event: {packageName: string; timestamp: number}) => {
+          console.log('App blocked event:', event);
+          // This event can be used to trigger prayer screen
+        }
+      );
+    }
+  }
+
+  /**
+   * Cleanup event listeners
+   */
+  cleanup() {
+    if (this.appBlockedSubscription) {
+      this.appBlockedSubscription.remove();
+    }
+  }
+
   /**
    * Request permission for app blocking
-   * iOS: Screen Time API permission
+   * iOS: Screen Time API authorization
    * Android: Accessibility Service permission
    */
   async requestPermission(): Promise<boolean> {
     try {
-      if (!NativeAppBlocking) {
-        console.warn('Native blocking module not available');
-        return false;
+      if (Platform.OS === 'ios') {
+        if (!ScreenTimeManager) {
+          console.warn('iOS Screen Time Manager not available');
+          return false;
+        }
+
+        const result = await ScreenTimeManager.requestAuthorization();
+        return result.authorized;
+      } else {
+        if (!BlockingModule) {
+          console.warn('Android Blocking Module not available');
+          return false;
+        }
+
+        const result = await BlockingModule.requestPermission();
+        // Android opens settings, doesn't return authorization status directly
+        return result.opened;
       }
-      return await NativeAppBlocking.requestPermission();
     } catch (error) {
       console.error('Error requesting blocking permission:', error);
       return false;
@@ -51,14 +122,97 @@ class BlockingService {
    */
   async hasPermission(): Promise<boolean> {
     try {
-      if (!NativeAppBlocking) {
-        console.warn('Native blocking module not available');
-        return false;
+      if (Platform.OS === 'ios') {
+        if (!ScreenTimeManager) {
+          return false;
+        }
+
+        const result = await ScreenTimeManager.checkAuthorizationStatus();
+        return result.authorized;
+      } else {
+        if (!BlockingModule) {
+          return false;
+        }
+
+        const result = await BlockingModule.checkPermissionStatus();
+        return result.hasPermission && result.isServiceRunning;
       }
-      return await NativeAppBlocking.hasPermission();
     } catch (error) {
       console.error('Error checking blocking permission:', error);
       return false;
+    }
+  }
+
+  /**
+   * Get detailed permission status
+   */
+  async getPermissionStatus(): Promise<{
+    hasPermission: boolean;
+    status: string;
+    message: string;
+  }> {
+    try {
+      if (Platform.OS === 'ios') {
+        if (!ScreenTimeManager) {
+          return {
+            hasPermission: false,
+            status: 'unavailable',
+            message: 'Screen Time API not available',
+          };
+        }
+
+        const result = await ScreenTimeManager.checkAuthorizationStatus();
+        return {
+          hasPermission: result.authorized,
+          status: result.status,
+          message: this.getIOSStatusMessage(result.status),
+        };
+      } else {
+        if (!BlockingModule) {
+          return {
+            hasPermission: false,
+            status: 'unavailable',
+            message: 'Blocking module not available',
+          };
+        }
+
+        const result = await BlockingModule.checkPermissionStatus();
+        return {
+          hasPermission: result.hasPermission && result.isServiceRunning,
+          status: result.status,
+          message: this.getAndroidStatusMessage(result.status, result.isServiceRunning),
+        };
+      }
+    } catch (error) {
+      console.error('Error getting permission status:', error);
+      return {
+        hasPermission: false,
+        status: 'error',
+        message: 'Failed to check permission status',
+      };
+    }
+  }
+
+  private getIOSStatusMessage(status: string): string {
+    switch (status) {
+      case 'notDetermined':
+        return 'Permission not requested yet';
+      case 'denied':
+        return 'Screen Time permission denied';
+      case 'approved':
+        return 'Screen Time authorized';
+      default:
+        return 'Unknown status';
+    }
+  }
+
+  private getAndroidStatusMessage(status: string, isRunning: boolean): string {
+    if (status === 'granted' && isRunning) {
+      return 'Accessibility service enabled and running';
+    } else if (status === 'granted' && !isRunning) {
+      return 'Accessibility enabled but service not running';
+    } else {
+      return 'Accessibility service not enabled';
     }
   }
 
@@ -67,11 +221,19 @@ class BlockingService {
    */
   async getInstalledApps(): Promise<InstalledApp[]> {
     try {
-      if (!NativeAppBlocking) {
+      const nativeModule = Platform.OS === 'ios' ? ScreenTimeManager : BlockingModule;
+
+      if (!nativeModule) {
         console.warn('Native blocking module not available, returning mock data');
         return this.getMockInstalledApps();
       }
-      return await NativeAppBlocking.getInstalledApps();
+
+      const apps = await nativeModule.getInstalledApps();
+      return apps.map(app => ({
+        bundleId: app.bundleId,
+        appName: app.name,
+        appIcon: app.icon,
+      }));
     } catch (error) {
       console.error('Error getting installed apps:', error);
       return this.getMockInstalledApps();
@@ -83,11 +245,15 @@ class BlockingService {
    */
   async blockApps(bundleIds: string[]): Promise<boolean> {
     try {
-      if (!NativeAppBlocking) {
+      const nativeModule = Platform.OS === 'ios' ? ScreenTimeManager : BlockingModule;
+
+      if (!nativeModule) {
         console.warn('Native blocking module not available');
         return false;
       }
-      return await NativeAppBlocking.blockApps(bundleIds);
+
+      const result = await nativeModule.blockApps(bundleIds);
+      return result.success;
     } catch (error) {
       console.error('Error blocking apps:', error);
       return false;
@@ -99,13 +265,53 @@ class BlockingService {
    */
   async unblockApps(bundleIds: string[], durationSeconds: number): Promise<boolean> {
     try {
-      if (!NativeAppBlocking) {
-        console.warn('Native blocking module not available');
-        return false;
+      if (Platform.OS === 'ios') {
+        if (!ScreenTimeManager) {
+          console.warn('iOS Screen Time Manager not available');
+          return false;
+        }
+
+        // iOS: Just unblock, timer handled in JS layer
+        const result = await ScreenTimeManager.unblockApps(bundleIds);
+        return result.success;
+      } else {
+        if (!BlockingModule) {
+          console.warn('Android Blocking Module not available');
+          return false;
+        }
+
+        // Android: Native module handles timer
+        const result = await BlockingModule.unblockApps(bundleIds, durationSeconds);
+        return result.success;
       }
-      return await NativeAppBlocking.unblockApps(bundleIds, durationSeconds);
     } catch (error) {
       console.error('Error unblocking apps:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Lock all apps (re-enable blocking)
+   */
+  async lockAllApps(): Promise<boolean> {
+    try {
+      if (Platform.OS === 'ios') {
+        if (!ScreenTimeManager) {
+          return false;
+        }
+
+        const result = await ScreenTimeManager.unblockAllApps();
+        return result.success;
+      } else {
+        if (!BlockingModule) {
+          return false;
+        }
+
+        const result = await BlockingModule.lockAllApps();
+        return result.success;
+      }
+    } catch (error) {
+      console.error('Error locking all apps:', error);
       return false;
     }
   }
@@ -115,10 +321,13 @@ class BlockingService {
    */
   async isAppBlocked(bundleId: string): Promise<boolean> {
     try {
-      if (!NativeAppBlocking) {
-        return false;
+      if (Platform.OS === 'android' && BlockingModule) {
+        const blockedApps = await BlockingModule.getBlockedApps();
+        return blockedApps.includes(bundleId);
       }
-      return await NativeAppBlocking.isAppBlocked(bundleId);
+
+      // iOS: Would need to track this in app state
+      return false;
     } catch (error) {
       console.error('Error checking if app is blocked:', error);
       return false;
@@ -126,17 +335,18 @@ class BlockingService {
   }
 
   /**
-   * Open system settings for app blocking permissions
+   * Open app picker (iOS only)
    */
-  async openAppSettings(): Promise<void> {
-    try {
-      if (!NativeAppBlocking) {
-        console.warn('Native blocking module not available');
-        return;
+  async openAppPicker(): Promise<void> {
+    if (Platform.OS === 'ios' && ScreenTimeManager) {
+      try {
+        await ScreenTimeManager.openAppPicker();
+      } catch (error) {
+        console.error('Error opening app picker:', error);
+        throw error;
       }
-      await NativeAppBlocking.openAppSettings();
-    } catch (error) {
-      console.error('Error opening app settings:', error);
+    } else {
+      throw new Error('App picker only available on iOS');
     }
   }
 
@@ -151,8 +361,7 @@ class BlockingService {
         appIcon: '',
       },
       {
-        bundleId:
-          Platform.OS === 'ios' ? 'com.burbn.instagram' : 'com.instagram.android',
+        bundleId: Platform.OS === 'ios' ? 'com.burbn.instagram' : 'com.instagram.android',
         appName: 'Instagram',
         appIcon: '',
       },
@@ -194,25 +403,32 @@ class BlockingService {
       return {
         title: 'Enable Screen Time',
         steps: [
-          'Open Settings app',
-          'Go to Screen Time',
-          'Tap "Turn On Screen Time"',
-          'Select "This is My Device"',
-          'Return to PrayScreen and grant permission',
+          'Tap "Request Permission" below',
+          'Review the Screen Time permission dialog',
+          'Tap "Allow" to grant access',
+          'PrayScreen will then be able to block apps',
+          'Note: Screen Time requires iOS 15.0 or later',
         ],
       };
     } else {
       return {
         title: 'Enable Accessibility Service',
         steps: [
-          'Open Settings app',
-          'Go to Accessibility',
-          'Find "PrayScreen" in the list',
-          'Toggle the switch to enable',
+          'Tap "Open Settings" below',
+          'Find and tap "PrayScreen" in the list',
+          'Toggle the switch to ON',
           'Confirm the permission dialog',
+          'Return to PrayScreen',
         ],
       };
     }
+  }
+
+  /**
+   * Check if native modules are available
+   */
+  isAvailable(): boolean {
+    return Platform.OS === 'ios' ? ScreenTimeManager !== null : BlockingModule !== null;
   }
 }
 
