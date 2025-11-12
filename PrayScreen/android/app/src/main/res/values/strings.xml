@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PrayScreen</string>
+    <string name="accessibility_service_description">PrayScreen monitors app launches to block distracting apps and encourage prayer time. Your data stays private on your device.</string>
+</resources>
