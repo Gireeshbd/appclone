@@ -20,7 +20,10 @@ export type VerseCategory =
   | 'joy'
   | 'guidance'
   | 'protection'
-  | 'comfort';
+  | 'comfort'
+  | 'prayer'
+  | 'acceptance'
+  | 'focus';
 
 export interface VerseContent {
   id: string;

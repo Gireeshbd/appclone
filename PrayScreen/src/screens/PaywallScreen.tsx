@@ -47,6 +47,18 @@ export const PaywallScreen: React.FC<Props> = ({route, navigation}) => {
     loadOfferings();
   }, []);
 
+  // Validate selectedPlan when plans change
+  useEffect(() => {
+    if (plans.length > 0) {
+      const isValidSelection = plans.some(p => p.id === selectedPlan);
+      if (!isValidSelection) {
+        // Select the popular plan, or fall back to the first plan
+        const popularPlan = plans.find(p => p.isPopular);
+        setSelectedPlan(popularPlan?.id || plans[0].id);
+      }
+    }
+  }, [plans]);
+
   const loadOfferings = async () => {
     setLoading(true);
     try {

@@ -11,6 +11,7 @@ interface AppState {
   isBlocking: boolean;
   currentlyUnlockedApps: string[]; // Bundle IDs
   unlockExpiresAt: Date | null;
+  unlockTimerId: NodeJS.Timeout | null;
 
   // Actions
   setBlockedApps: (apps: BlockedApp[]) => void;
@@ -23,12 +24,13 @@ interface AppState {
   lockApps: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   blockedApps: [],
   installedApps: [],
   isBlocking: true,
   currentlyUnlockedApps: [],
   unlockExpiresAt: null,
+  unlockTimerId: null,
 
   setBlockedApps: (apps) => set({blockedApps: apps}),
 
@@ -54,21 +56,35 @@ export const useAppStore = create<AppState>((set) => ({
   setBlocking: (isBlocking) => set({isBlocking}),
 
   unlockApps: (bundleIds, duration) => {
+    // Clear existing timer if any
+    const state = get();
+    if (state.unlockTimerId) {
+      clearTimeout(state.unlockTimerId);
+    }
+
     const expiresAt = new Date(Date.now() + duration * 1000);
+
+    // Auto-lock after duration
+    const timerId = setTimeout(() => {
+      set({currentlyUnlockedApps: [], unlockExpiresAt: null, unlockTimerId: null});
+    }, duration * 1000);
+
     set({
       currentlyUnlockedApps: bundleIds,
       unlockExpiresAt: expiresAt,
+      unlockTimerId: timerId,
     });
-
-    // Auto-lock after duration
-    setTimeout(() => {
-      set({currentlyUnlockedApps: [], unlockExpiresAt: null});
-    }, duration * 1000);
   },
 
-  lockApps: () =>
+  lockApps: () => {
+    const state = get();
+    if (state.unlockTimerId) {
+      clearTimeout(state.unlockTimerId);
+    }
     set({
       currentlyUnlockedApps: [],
       unlockExpiresAt: null,
-    }),
+      unlockTimerId: null,
+    });
+  },
 }));

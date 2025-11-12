@@ -33,8 +33,8 @@ class SessionService {
       verseId: params.verseId,
       verseText: params.verseText,
       verseReference: params.verseReference,
-      startedAt: new Date(),
-      completedAt: new Date(), // Will be updated when completed
+      startedAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(), // Will be updated when completed
       duration: 0,
       requiredDuration: params.requiredDuration,
       triggeredBy: params.triggeredByApps,
@@ -43,7 +43,7 @@ class SessionService {
       unlockDuration: 0,
       deviceType: 'ios', // TODO: Detect actual device type
       appVersion: '1.0.0', // TODO: Get from app config
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
 
     return session;
@@ -62,7 +62,7 @@ class SessionService {
   }): Promise<PrayerSession> {
     const completedSession: PrayerSession = {
       ...params.session,
-      completedAt: new Date(),
+      completedAt: new Date().toISOString(),
       duration: params.actualDuration,
       wasCompleted: params.wasCompleted,
       bypassReason: params.bypassReason,
@@ -98,13 +98,7 @@ class SessionService {
       if (!sessionsJson) return [];
 
       const sessions = JSON.parse(sessionsJson);
-      // Convert date strings back to Date objects
-      return sessions.map((s: any) => ({
-        ...s,
-        startedAt: new Date(s.startedAt),
-        completedAt: new Date(s.completedAt),
-        createdAt: new Date(s.createdAt),
-      }));
+      return sessions;
     } catch (error) {
       console.error('Error loading sessions:', error);
       return [];
@@ -228,18 +222,31 @@ class SessionService {
     // Calculate longest streak from all history
     const allDates = Array.from(sessionsByDate.keys()).sort().reverse();
     tempStreak = 0;
+    let previousDate: Date | null = null;
 
     for (let i = 0; i < allDates.length; i++) {
       const dateKey = allDates[i];
       const sessionsOnDate = sessionsByDate.get(dateKey);
+      const currentDate = new Date(dateKey);
 
       if (sessionsOnDate && sessionsOnDate.some(s => s.wasCompleted)) {
+        // Check if this date is consecutive with the previous date
+        if (previousDate !== null) {
+          const dayDiff = Math.abs((previousDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+          if (dayDiff > 1) {
+            // Gap found, reset streak
+            tempStreak = 0;
+          }
+        }
+
         tempStreak++;
         if (tempStreak > longestStreak) {
           longestStreak = tempStreak;
         }
+        previousDate = currentDate;
       } else {
         tempStreak = 0;
+        previousDate = null;
       }
     }
 

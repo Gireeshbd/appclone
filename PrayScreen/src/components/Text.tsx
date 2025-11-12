@@ -3,13 +3,13 @@
  */
 
 import React from 'react';
-import {Text as RNText, StyleSheet, TextStyle, TextProps as RNTextProps} from 'react-native';
+import {Text as RNText, StyleSheet, TextStyle, StyleProp, TextProps as RNTextProps} from 'react-native';
 import {typography, colors, TypographyKey} from '@theme';
 
 interface TextProps extends RNTextProps {
   variant?: TypographyKey;
   color?: string;
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   children: React.ReactNode;
 }
 

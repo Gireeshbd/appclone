@@ -15,8 +15,8 @@ export interface PrayerSession {
   verseReference?: string; // Snapshot
 
   // When and how long
-  startedAt: Date;
-  completedAt: Date;
+  startedAt: string; // ISO timestamp
+  completedAt: string; // ISO timestamp
   duration: number; // Actual seconds
   requiredDuration: number; // Minimum required
 
@@ -32,5 +32,5 @@ export interface PrayerSession {
   // Metadata
   deviceType: 'ios' | 'android';
   appVersion: string;
-  createdAt: Date;
+  createdAt: string; // ISO timestamp
 }

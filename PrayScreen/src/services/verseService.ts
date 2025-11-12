@@ -263,9 +263,9 @@ class VerseService {
   recordReadingTime(verseId: string, duration: number): void {
     const verse = this.verses.find(v => v.id === verseId);
     if (verse) {
-      // Calculate new average
+      // Calculate new average (timesShown already includes current instance)
       const totalTime = verse.averageReadingTime * verse.timesShown;
-      verse.averageReadingTime = (totalTime + duration) / (verse.timesShown + 1);
+      verse.averageReadingTime = (totalTime + duration) / verse.timesShown;
     }
   }
 
