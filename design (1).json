@@ -1,0 +1,407 @@
+{
+  "meta": {
+    "name": "Pray Screen \u2013 Dark Coral System",
+    "version": "1.0.0",
+    "description": "Design tokens + component recipes to replicate the dark, warm-coral spiritual app aesthetic from the screenshots."
+  },
+  "brand": {
+    "tone": "serious, minimal, devotional, warm",
+    "keywords": [
+      "dark mode",
+      "radial warm glow",
+      "big serif headlines",
+      "rounded cards",
+      "iOS-native feel"
+    ]
+  },
+  "grid": {
+    "screenPadding": 24,
+    "contentMaxWidth": null,
+    "gutter": 12,
+    "rowSpacing": 16,
+    "safeAreaAware": true
+  },
+  "spacing": {
+    "scale": [
+      0,
+      4,
+      8,
+      12,
+      16,
+      20,
+      24,
+      28,
+      32,
+      40,
+      48,
+      56,
+      64
+    ],
+    "sectionY": 40,
+    "cardPadding": 20,
+    "buttonPaddingX": 24,
+    "buttonPaddingY": 18,
+    "chipPadding": 16,
+    "sheetHandle": 6
+  },
+  "radii": {
+    "xs": 8,
+    "sm": 12,
+    "md": 16,
+    "lg": 20,
+    "xl": 24,
+    "xxl": 28,
+    "pill": 999
+  },
+  "elevation": {
+    "shadow1": "0px 2px 8px rgba(0,0,0,0.25)",
+    "shadow2": "0px 8px 24px rgba(0,0,0,0.35)",
+    "shadow3": "0px 16px 48px rgba(0,0,0,0.45)",
+    "innerGlow": "inset 0 0 0 1px rgba(255,255,255,0.04)"
+  },
+  "colors": {
+    "background": "#0E1217",
+    "surface": "#15191F",
+    "surfaceElevated": "#1D232B",
+    "surfaceMuted": "#232A33",
+    "outline": "#2B323C",
+    "textPrimary": "#E8ECF2",
+    "textSecondary": "#B8C0CC",
+    "textMuted": "#8C97A6",
+    "accent": "#FF6A5A",
+    "accentSoft": "#FF8A70",
+    "success": "#34C759",
+    "warning": "#FFC773",
+    "danger": "#FF3B30",
+    "starGold": "#F7C948",
+    "disabledBg": "rgba(255,255,255,0.06)",
+    "disabledText": "rgba(232,236,242,0.38)"
+  },
+  "gradients": {
+    "bgRadialWarm": {
+      "type": "radial",
+      "shape": "circle",
+      "stops": [
+        {
+          "color": "rgba(255,106,90,0.22)",
+          "position": "0%"
+        },
+        {
+          "color": "rgba(255,106,90,0.12)",
+          "position": "30%"
+        },
+        {
+          "color": "rgba(14,18,23,0.0)",
+          "position": "70%"
+        }
+      ]
+    },
+    "headlineSilver": {
+      "type": "linear",
+      "angle": 180,
+      "stops": [
+        {
+          "color": "#E6EBF2",
+          "position": "0%"
+        },
+        {
+          "color": "#C7CED8",
+          "position": "60%"
+        },
+        {
+          "color": "#AAB3BF",
+          "position": "100%"
+        }
+      ]
+    },
+    "buttonShine": {
+      "type": "linear",
+      "angle": 180,
+      "stops": [
+        {
+          "color": "rgba(255,255,255,0.10)",
+          "position": "0%"
+        },
+        {
+          "color": "rgba(255,255,255,0.0)",
+          "position": "100%"
+        }
+      ]
+    }
+  },
+  "typography": {
+    "fonts": {
+      "display": [
+        "Canela",
+        "Playfair Display",
+        "Recoleta",
+        "Georgia",
+        "serif"
+      ],
+      "body": [
+        "SF Pro Text",
+        "Inter",
+        "-apple-system",
+        "Segoe UI",
+        "Roboto",
+        "sans-serif"
+      ],
+      "numerals": "tabular-nums"
+    },
+    "display1": {
+      "family": "display",
+      "size": 44,
+      "lineHeight": 52,
+      "weight": 700,
+      "letterSpacing": -0.5
+    },
+    "display2": {
+      "family": "display",
+      "size": 36,
+      "lineHeight": 42,
+      "weight": 700,
+      "letterSpacing": -0.4
+    },
+    "title": {
+      "family": "display",
+      "size": 28,
+      "lineHeight": 34,
+      "weight": 700,
+      "letterSpacing": -0.3
+    },
+    "headline": {
+      "family": "display",
+      "size": 24,
+      "lineHeight": 30,
+      "weight": 700,
+      "letterSpacing": -0.25
+    },
+    "bodyLg": {
+      "family": "body",
+      "size": 18,
+      "lineHeight": 26,
+      "weight": 400,
+      "letterSpacing": 0
+    },
+    "body": {
+      "family": "body",
+      "size": 16,
+      "lineHeight": 24,
+      "weight": 400,
+      "letterSpacing": 0
+    },
+    "bodySm": {
+      "family": "body",
+      "size": 14,
+      "lineHeight": 20,
+      "weight": 400,
+      "letterSpacing": 0
+    },
+    "button": {
+      "family": "body",
+      "size": 18,
+      "lineHeight": 22,
+      "weight": 600,
+      "letterSpacing": 0
+    },
+    "caption": {
+      "family": "body",
+      "size": 12,
+      "lineHeight": 16,
+      "weight": 500,
+      "letterSpacing": 0.2
+    }
+  },
+  "iconography": {
+    "style": "rounded-line",
+    "stroke": 1.5
+  },
+  "motion": {
+    "durations": {
+      "fast": 120,
+      "normal": 220,
+      "slow": 360
+    },
+    "easings": {
+      "standard": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      "emphasized": "cubic-bezier(0.05, 0.7, 0.1, 1)"
+    },
+    "tapScale": 0.98
+  },
+  "components": {
+    "buttonPrimary": {
+      "bg": "#232A33",
+      "text": "#E8ECF2",
+      "accentUnderline": false,
+      "radius": 24,
+      "paddingX": 24,
+      "paddingY": 18,
+      "shadow": "0 10px 30px rgba(0,0,0,0.45)",
+      "hover": {
+        "bg": "#2A313B"
+      },
+      "active": {
+        "scale": 0.98
+      },
+      "disabled": {
+        "bg": "rgba(255,255,255,0.06)",
+        "text": "rgba(232,236,242,0.38)"
+      }
+    },
+    "buttonCTA": {
+      "bg": "#000000",
+      "text": "#FFFFFF",
+      "radius": 20,
+      "paddingX": 24,
+      "paddingY": 18
+    },
+    "buttonGhost": {
+      "bg": "transparent",
+      "text": "#E8ECF2",
+      "border": "1px solid #2B323C",
+      "radius": 16,
+      "paddingX": 16,
+      "paddingY": 12
+    },
+    "linkAccent": {
+      "text": "#FF6A5A"
+    },
+    "progressBar": {
+      "height": 8,
+      "track": "rgba(255,255,255,0.10)",
+      "fill": "#FF8A70",
+      "radius": 8
+    },
+    "card": {
+      "bg": "#1D232B",
+      "text": "#E8ECF2",
+      "padding": 20,
+      "radius": 24,
+      "shadow": "0 12px 36px rgba(0,0,0,0.40)",
+      "divider": "rgba(255,255,255,0.06)"
+    },
+    "testimonialCard": {
+      "base": "@components.card",
+      "avatarSize": 44,
+      "starColor": "#F7C948",
+      "titleStyle": "@typography.headline",
+      "bodyStyle": "@typography.body"
+    },
+    "radioChip": {
+      "bg": "#15191F",
+      "selectedBg": "#1D232B",
+      "border": "1px solid #2B323C",
+      "selectedBorder": "1px solid rgba(255,106,90,0.6)",
+      "text": "#E8ECF2",
+      "selectedText": "#E8ECF2",
+      "radius": 20,
+      "paddingX": 16,
+      "paddingY": 14,
+      "checkmark": {
+        "bg": "#FF6A5A",
+        "size": 22
+      }
+    },
+    "sheet": {
+      "bg": "#15191F",
+      "radiusTop": 28,
+      "handle": {
+        "width": 44,
+        "height": 6,
+        "radius": 3,
+        "bg": "rgba(255,255,255,0.16)"
+      },
+      "shadow": "0 -24px 48px rgba(0,0,0,0.50)"
+    },
+    "paywall": {
+      "titleStyle": "@typography.display2",
+      "priceBadge": {
+        "bg": "#FF8A70",
+        "text": "#0E1217",
+        "radius": 16,
+        "paddingX": 18,
+        "paddingY": 10
+      },
+      "timerStyle": {
+        "family": "body",
+        "size": 28,
+        "weight": 700,
+        "color": "#E8ECF2"
+      },
+      "cta": "@components.buttonCTA",
+      "footnote": {
+        "text": "#B8C0CC",
+        "emojiAllowed": true
+      }
+    },
+    "prayerCard": {
+      "bg": "#232A33",
+      "radius": 24,
+      "padding": 20,
+      "quoteMarks": {
+        "color": "#8C97A6",
+        "opacity": 0.8
+      },
+      "textStyle": "@typography.bodyLg"
+    },
+    "emptyState": {
+      "iconTint": "#8C97A6",
+      "caption": "@typography.bodySm"
+    },
+    "settingsListItem": {
+      "bg": "#1D232B",
+      "radius": 20,
+      "padding": 18,
+      "rightChevron": {
+        "opacity": 0.9
+      },
+      "iconTint": "#FF8A70"
+    },
+    "badgeSoft": {
+      "bg": "rgba(255,106,90,0.15)",
+      "text": "#FF8A70",
+      "radius": 12,
+      "paddingX": 10,
+      "paddingY": 6
+    },
+    "progressDots": {
+      "dotSize": 6,
+      "activeWidth": 16,
+      "inactiveColor": "rgba(255,255,255,0.24)",
+      "activeColor": "#FF8A70",
+      "gap": 8
+    }
+  },
+  "compositions": {
+    "heroWithGradient": {
+      "background": [
+        "colors.background",
+        "gradients.bgRadialWarm"
+      ],
+      "headline": {
+        "style": "@typography.display1",
+        "color": "@gradients.headlineSilver"
+      },
+      "accentWordColor": "colors.accent",
+      "bottomCTA": "@components.buttonPrimary"
+    },
+    "questionnaire": {
+      "titleStyle": "@typography.display2",
+      "choices": "@components.radioChip",
+      "nextButton": "@components.buttonPrimary"
+    },
+    "homeEmpty": {
+      "topActions": [
+        "haloButton",
+        "settingsFab"
+      ],
+      "emptyState": "@components.emptyState",
+      "bottomCTA": "@components.buttonPrimary"
+    }
+  },
+  "accessibility": {
+    "minContrastRatio": 4.5,
+    "hitTargetMin": 44,
+    "focusRing": "0 0 0 2px rgba(255,106,90,0.7)"
+  }
+}
