@@ -6,9 +6,8 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {MainTabParamList} from '@types';
 import {colors, typography} from '@theme';
-
-// Placeholder screens
-import {Screen, BodyText} from '@components';
+import {HomeScreen, SettingsScreen} from '@screens';
+import {Screen, Text} from '@components';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -41,14 +40,14 @@ export const MainTabNavigator: React.FC = () => {
       />
       <Tab.Screen
         name="Progress"
-        component={ProgressScreen}
+        component={ProgressPlaceholder}
         options={{
           tabBarLabel: 'Progress',
         }}
       />
       <Tab.Screen
         name="Library"
-        component={LibraryScreen}
+        component={LibraryPlaceholder}
         options={{
           tabBarLabel: 'Library',
         }}
@@ -64,47 +63,25 @@ export const MainTabNavigator: React.FC = () => {
   );
 };
 
-// Placeholder screens
-const HomeScreen = () => (
+// Placeholder screens for features not yet implemented
+const ProgressPlaceholder = () => (
   <Screen>
-    <BodyText variant="display2" color={colors.textPrimary}>
-      Home
-    </BodyText>
-    <BodyText style={{marginTop: 16}}>
-      This is where blocked apps and prayer sessions will be managed.
-    </BodyText>
-  </Screen>
-);
-
-const ProgressScreen = () => (
-  <Screen>
-    <BodyText variant="display2" color={colors.textPrimary}>
+    <Text variant="display2" color={colors.textPrimary}>
       Progress
-    </BodyText>
-    <BodyText style={{marginTop: 16}}>
+    </Text>
+    <Text style={{marginTop: 16}}>
       Analytics, streaks, and achievements will be shown here.
-    </BodyText>
+    </Text>
   </Screen>
 );
 
-const LibraryScreen = () => (
+const LibraryPlaceholder = () => (
   <Screen>
-    <BodyText variant="display2" color={colors.textPrimary}>
+    <Text variant="display2" color={colors.textPrimary}>
       Library
-    </BodyText>
-    <BodyText style={{marginTop: 16}}>
+    </Text>
+    <Text style={{marginTop: 16}}>
       Browse and manage Bible verses and prayers here.
-    </BodyText>
-  </Screen>
-);
-
-const SettingsScreen = () => (
-  <Screen>
-    <BodyText variant="display2" color={colors.textPrimary}>
-      Settings
-    </BodyText>
-    <BodyText style={{marginTop: 16}}>
-      App settings, preferences, and subscription management.
-    </BodyText>
+    </Text>
   </Screen>
 );

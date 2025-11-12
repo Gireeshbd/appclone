@@ -6,14 +6,18 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {RootStackParamList} from '@types';
-
-// Placeholder screens - will be implemented
 import {MainTabNavigator} from './MainTabNavigator';
+import {
+  PrayerSessionScreen,
+  PaywallScreen,
+  AppSelectionScreen,
+} from '@screens';
+import {Screen, Text} from '@components';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator: React.FC = () => {
-  // TODO: Check if user has completed onboarding
+  // TODO: Check if user has completed onboarding from storage
   const hasCompletedOnboarding = true; // Placeholder
 
   return (
@@ -24,13 +28,13 @@ export const RootNavigator: React.FC = () => {
           animation: 'fade',
         }}>
         {!hasCompletedOnboarding ? (
-          <Stack.Screen name="Onboarding" component={PlaceholderScreen} />
+          <Stack.Screen name="Onboarding" component={OnboardingPlaceholder} />
         ) : (
           <>
             <Stack.Screen name="Main" component={MainTabNavigator} />
             <Stack.Screen
               name="PrayerSession"
-              component={PlaceholderScreen}
+              component={PrayerSessionScreen}
               options={{
                 presentation: 'fullScreenModal',
                 animation: 'slide_from_bottom',
@@ -38,14 +42,13 @@ export const RootNavigator: React.FC = () => {
             />
             <Stack.Screen
               name="Paywall"
-              component={PlaceholderScreen}
+              component={PaywallScreen}
               options={{
                 presentation: 'modal',
               }}
             />
-            <Stack.Screen name="Settings" component={PlaceholderScreen} />
-            <Stack.Screen name="AppSelection" component={PlaceholderScreen} />
-            <Stack.Screen name="VerseDetail" component={PlaceholderScreen} />
+            <Stack.Screen name="AppSelection" component={AppSelectionScreen} />
+            <Stack.Screen name="VerseDetail" component={VersePlaceholder} />
           </>
         )}
       </Stack.Navigator>
@@ -53,12 +56,17 @@ export const RootNavigator: React.FC = () => {
   );
 };
 
-// Placeholder screen component
-const PlaceholderScreen = () => {
-  const {Screen, BodyText} = require('@components');
-  return (
-    <Screen>
-      <BodyText>Placeholder Screen</BodyText>
-    </Screen>
-  );
-};
+// Placeholder screens for not yet implemented features
+const OnboardingPlaceholder = () => (
+  <Screen>
+    <Text variant="display2">Onboarding</Text>
+    <Text>Welcome flow will be implemented here</Text>
+  </Screen>
+);
+
+const VersePlaceholder = () => (
+  <Screen>
+    <Text variant="display2">Verse Detail</Text>
+    <Text>Verse detail screen will be implemented here</Text>
+  </Screen>
+);
